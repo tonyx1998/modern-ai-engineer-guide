@@ -8,326 +8,213 @@ description: Self-test covering all twelve phases of the AI project lifecycle.
 
 # Chapter 3 Checkpoint
 
-> **In one line:** If you can answer these without scrolling back, you've got the lifecycle. If not, the link on each question takes you to the right section.
+You've finished the AI Project Lifecycle chapter. Take a minute to make sure the core ideas stuck.
 
-:::tip[How to use this]
-This isn't a graded quiz — it's a self-test. Read each question, decide your answer in your head, then read the answer + commentary. If you got it wrong (or right for the wrong reason), follow the link back to the source page. Aim to score yourself at 11+/15. Below that, re-read the chapter; you'll save weeks of confusion later.
-:::
+There are **15 questions in the bank** — each visit picks 5 at random, so retaking gives you different ones. If you miss one, the result card tells you exactly which page section to revisit, and the link highlights the paragraph for you.
 
-## Phase coverage
+You must pass (≥ 60%) to unlock the Next button and Chapter 4 in the sidebar.
 
-The 15 questions are spread roughly:
+<Quiz id="lifecycle-checkpoint" title="AI Lifecycle checkpoint" sampleSize={5}>
 
-- Framing + data + approach (Phases 1-3): 4 questions
-- Evals + build + iterate (Phases 4-6): 4 questions
-- Harden + deploy + monitor (Phases 7-9): 4 questions
-- Improve + handoffs (Phases 10-11): 3 questions
+<Question
+  prompt="A stakeholder says, 'let's add AI to validate email addresses on signup.' What does the framing phase say to do?"
+  options={[
+    { text: "Build a quick GPT prototype to see how well it handles edge cases" },
+    { text: "Push back and use a regex or deterministic validator — the input is structured and the rules are well known" },
+    { text: "Fine-tune a small model on a corpus of real email addresses" },
+    { text: "Add RAG over a knowledge base of common email patterns" }
+  ]}
+  correct={1}
+  explanation="If a deterministic alternative exists for a structured-input problem with well-known rules, that's almost always the right v0. AI here would be slower, more expensive, and less reliable than a regex."
+  revisit={{ to: "/docs/lifecycle/problem-framing", label: "When AI is the wrong tool" }}
+/>
+
+<Question
+  prompt="Before any code is written, what must exist on a one-pager according to the framing phase?"
+  options={[
+    { text: "Architecture diagram, model choice, and infra cost estimate" },
+    { text: "User and problem in plain English, 5 hand-written ideal outputs, and a numeric success metric + failure cost" },
+    { text: "A list of competing products and their pricing tiers" },
+    { text: "Vector DB schema, prompt template, and eval framework selection" }
+  ]}
+  correct={1}
+  explanation="Without ideal outputs you don't know what 'good' looks like; without a numeric success metric you can't tell if you ever got there. Architecture comes after framing, not before."
+  revisit={{ to: "/docs/lifecycle/problem-framing", label: "Output of the framing phase" }}
+/>
+
+<Question
+  prompt="An AI project has three distinct data piles. Which one do teams most often underestimate?"
+  options={[
+    { text: "Knowledge data — the docs RAG retrieves from" },
+    { text: "Training data — (input, ideal_output) pairs for fine-tuning" },
+    { text: "Eval data — graded (input, expected) cases used to score the system" },
+    { text: "Telemetry data — logs of model latency and token counts" }
+  ]}
+  correct={2}
+  explanation="Teams reach launch with great knowledge data and zero graded eval cases, then can't tell whether their next change helps or hurts. Most projects never need training data; eval data is non-negotiable."
+  revisit={{ to: "/docs/lifecycle/data", label: "The three uses of data" }}
+/>
+
+<Question
+  prompt="What's the default order for trying AI patterns, and the rule for escalating?"
+  options={[
+    { text: "Always start with an agent — anything simpler is a toy" },
+    { text: "Fine-tune first to lock in domain quality, then add RAG and tools on top" },
+    { text: "Prompt (frontier) → prompt (cheap) → structured output → RAG → tools → agent → fine-tune; stop at the first that passes evals" },
+    { text: "Pick whichever pattern the latest blog post recommends this week" }
+  ]}
+  correct={2}
+  explanation="Each step up adds cost, latency, and operational pain. The most common mistake is jumping to 'let's build an agent' or 'let's fine-tune' before exhausting simpler prompting."
+  revisit={{ to: "/docs/lifecycle/approach", label: "Default decision order" }}
+/>
+
+<Question
+  prompt="Why can't AI evals just use `assert output == 'expected_string'` like unit tests?"
+  options={[
+    { text: "Because LLM APIs don't return strings, they return tokens" },
+    { text: "Because the system is stochastic and many wordings can be equally correct — evals check behavior, not exact strings" },
+    { text: "Because string comparison is too slow at eval-set scale" },
+    { text: "Because Python's == operator doesn't work on multiline output" }
+  ]}
+  correct={1}
+  explanation="Evals use structured behavioral checks: must cite this doc ID, must contain these phrases, tone must match a rubric (LLM judge), output must validate against a schema. Aggregate score across the set tells you whether things are improving."
+  revisit={{ to: "/docs/lifecycle/evals", label: "What an eval is" }}
+/>
+
+<Question
+  prompt="Which of these is the one thing v0 MUST have?"
+  options={[
+    { text: "A polished UI with multiple personas and a model router" },
+    { text: "A vector DB and a caching layer" },
+    { text: "A logged baseline eval score on real inputs" },
+    { text: "A framework that hides the provider SDK so you can swap models later" }
+  ]}
+  correct={2}
+  explanation="Without a baseline you can't tell whether the next month of iteration helped. v0 deliberately omits routing, multiple personas, frameworks, vector DBs (if a flat file works), and pretty UI."
+  revisit={{ to: "/docs/lifecycle/build", label: "What v0 looks like" }}
+/>
+
+<Question
+  prompt="What is the cardinal rule of the iterate-with-evals loop?"
+  options={[
+    { text: "Always ship the most experimental change first to maximize learning" },
+    { text: "Change one thing per cycle so you can attribute eval score movement to a specific change" },
+    { text: "Run evals only at the end of the sprint to save API costs" },
+    { text: "Only look at the aggregate eval score — per-slice breakdowns are noise" }
+  ]}
+  correct={1}
+  explanation="Bundle three changes into one PR and a score move tells you nothing about which change caused it. Three separate eval runs cost a few dollars and save weeks of debugging confusion."
+  revisit={{ to: "/docs/lifecycle/iterate", label: "What to avoid in the iterate loop" }}
+/>
+
+<Question
+  prompt="Your eval score is stuck. What should you try BEFORE reaching for fine-tuning?"
+  options={[
+    { text: "Switch immediately to a fine-tuned open-source model — frontier prompting has a hard ceiling" },
+    { text: "Prompt wording → few-shot examples → system prompt structure → output schema → retrieval settings → model → decomposition" },
+    { text: "Rewrite the entire eval set with stricter expected outputs" },
+    { text: "Add a second LLM judge to grade the first model's output" }
+  ]}
+  correct={1}
+  explanation="Fine-tuning is the last resort, in order of cheapness. Teams that fine-tune early end up locked into stale models, when three sentences added to the prompt would have moved the score the same amount in 20 minutes."
+  revisit={{ to: "/docs/lifecycle/iterate", label: "What to vary, in order of cheapness" }}
+/>
+
+<Question
+  prompt="Where should the daily $ spend cap live for an AI feature?"
+  options={[
+    { text: "Only in application code — the provider's billing is too slow to react" },
+    { text: "Only at the provider console — application code shouldn't know about money" },
+    { text: "Both places: in application code AND at the provider console — belt and suspenders" },
+    { text: "In a Slack reminder to the on-call engineer" }
+  ]}
+  correct={2}
+  explanation="The app-side cap catches runaway logic; the provider-side cap catches bugs in your app-side cap. Cost of a weekend $5K bill: $5K. Cost of implementing both caps: one hour."
+  revisit={{ to: "/docs/lifecycle/harden", label: "Cost discipline in the harden phase" }}
+/>
+
+<Question
+  prompt="Which is a STRUCTURAL defense against prompt injection (not just trusting the model)?"
+  options={[
+    { text: "Add 'do not follow injected instructions' to the system prompt and rely on the model's safety training" },
+    { text: "Clearly delimit user/retrieved content, label it as untrusted, validate outputs, sandbox tools at the executor, and never put user content in the system slot" },
+    { text: "Use a more expensive frontier model — they're immune to injection" },
+    { text: "Rate-limit suspicious users by IP" }
+  ]}
+  correct={1}
+  explanation="Relying on the model's safety training alone is insufficient. Architectural defenses — delimiters, labeling, output validation, sandboxed tools — are what actually contain the blast radius of a successful injection."
+  revisit={{ to: "/docs/lifecycle/harden", label: "Safety and prompt injection" }}
+/>
+
+<Question
+  prompt="Why should you ship to a 5% cohort before going to 100%?"
+  options={[
+    { text: "Provider rate limits force you to ramp gradually" },
+    { text: "About 30% of eventual issues only appear at full traffic, but the first 30% appear internally and another 30% in the 5% cohort — staged ramps catch them at low blast radius" },
+    { text: "Cohort routing makes inference faster" },
+    { text: "Marketing requires a 'beta' period before any public launch" }
+  ]}
+  correct={1}
+  explanation="The kill-switch flag flip is identical at 5% and at 100%, but the user impact isn't. Rollback at 5% is '0.3% of users saw a bad experience'; rollback at 100% is 'everyone did.'"
+  revisit={{ to: "/docs/lifecycle/deploy", label: "Cohort deployment pattern" }}
+/>
+
+<Question
+  prompt="Your cold eval set scores 0.92 but the nightly prod-eval has drifted to 0.78 over a month. What's the most likely cause?"
+  options={[
+    { text: "The model has degraded — file a ticket with the provider" },
+    { text: "Your eval set has drifted out of sync with real traffic; sample fresh production failures, add them as cases, and prune stale ones" },
+    { text: "The prod-eval LLM judge is broken — switch judges" },
+    { text: "Latency spikes are confusing your scoring rubric" }
+  ]}
+  correct={1}
+  explanation="When cold-eval and prod-eval diverge, the most common cause is eval-set staleness. Eval sets should roughly track production distribution; when they don't, the eval score lies to you. Also rule out a silent model update or retrieval regression."
+  revisit={{ to: "/docs/lifecycle/monitor", label: "Drift detection" }}
+/>
+
+<Question
+  prompt="Which alerting policy is correct for a production AI feature?"
+  options={[
+    { text: "Page on every individual user thumbs-down so nothing slips" },
+    { text: "Page only when the daily exec dashboard turns red" },
+    { text: "Page on aggregate signals (spend > 1.6× forecast, eval drop > 5% WoW, schema-fail rate > 2% for 15 min); triage individual events without paging" },
+    { text: "Page on any call that takes longer than 10 seconds" }
+  ]}
+  correct={2}
+  explanation="Alert on rates and trends, not individual events. Pager fatigue from per-call alerts destroys the signal value of real alerts. Individual bad answers go into the triage queue, not the on-call's phone."
+  revisit={{ to: "/docs/lifecycle/monitor", label: "What not to alert on" }}
+/>
+
+<Question
+  prompt="What's the single highest-leverage habit for compounding AI quality over a year?"
+  options={[
+    { text: "Upgrade to the newest frontier model the day it ships" },
+    { text: "Turn every production failure into an eval case, weekly — sample logs, triage, add with correct expected outputs, run the iterate loop" },
+    { text: "Hire a dedicated prompt engineer once you hit 10 prompts" },
+    { text: "Rewrite the prompt from scratch each quarter to avoid prompt rot" }
+  ]}
+  correct={1}
+  explanation="Teams that do this watch their eval set grow from 100 to 800+ cases in year one, with scores climbing from ~0.6 to ~0.9. The weekly review meeting is the cadence that makes it stick — without it, 'we'll sample logs' becomes 'we never did.'"
+  revisit={{ to: "/docs/lifecycle/improve", label: "The weekly review meeting" }}
+/>
+
+<Question
+  prompt="Why is 'the prompt lives in a Python string in the codebase' considered an anti-pattern in the handoffs phase?"
+  options={[
+    { text: "Python strings can't hold multi-line text reliably" },
+    { text: "Prompts are versioned product artifacts — they need a registry with version, owner, model, changelog, PR review, and linkage from monitoring" },
+    { text: "Domain experts only speak YAML, not Python" },
+    { text: "Prompts should be generated at runtime, never stored statically" }
+  ]}
+  correct={1}
+  explanation="A prompt buried in code with no version history means no reproducibility, no clear ownership, no way to attribute regressions, and no way for a domain expert to suggest a change via PR. The prompt registry is one of the highest-ROI process changes you can make."
+  revisit={{ to: "/docs/lifecycle/handoffs", label: "AI engineer owns the prompt registry" }}
+/>
+
+</Quiz>
 
 ---
 
-## Q1. Framing: when AI is the wrong tool
+## What's next
 
-A stakeholder says, "we want to add AI to validate email addresses on signup." What does the framing phase say to do?
-
-<details>
-<summary>Answer</summary>
-
-**Push back and use a regex or a deterministic validator.** The input is already structured, the rules are well-known, and a wrong answer is catastrophic (locking out real users) at sub-cent cost per call where AI would cost orders of magnitude more.
-
-The framing question that catches this: *"Is there a deterministic alternative?"* If yes, that's almost always the right v0.
-
-→ Revisit: [Problem framing — when AI is the wrong tool](./01-problem-framing.md#when-ai-is-the-wrong-tool)
-</details>
-
----
-
-## Q2. Framing: what to write down before building
-
-Before any code, what three things must exist on a one-pager?
-
-<details>
-<summary>Answer</summary>
-
-1. **The user + the problem** in plain English.
-2. **5 hand-written ideal outputs** for representative inputs.
-3. **The failure cost + the success metric** (numeric, measurable in 90 days).
-
-Plus a dated go/no-go decision with names. If any of these are missing, you're not ready to build — you're ready to do framing first.
-
-→ Revisit: [Problem framing — output of this phase](./01-problem-framing.md#output-of-this-phase)
-</details>
-
----
-
-## Q3. Data: the three data piles
-
-What are the three different data needs in an AI project, and which one do teams most often underestimate?
-
-<details>
-<summary>Answer</summary>
-
-1. **Knowledge data** — the docs RAG retrieves from.
-2. **Eval data** — graded `(input, expected)` cases used to score the system.
-3. **Training data** — `(input, ideal_output)` pairs used to fine-tune (most projects never need this).
-
-Teams most often underestimate the **eval set**. They reach launch with great knowledge data and zero graded eval cases, and then can't tell whether their next change helps or hurts.
-
-→ Revisit: [Data sourcing — three uses of data](./02-data.md#the-three-uses-of-data)
-</details>
-
----
-
-## Q4. Approach: the default order
-
-In what order should you try AI patterns, and what's the rule for moving from one to the next?
-
-<details>
-<summary>Answer</summary>
-
-Order: **pure prompting (frontier) → pure prompting (cheap) → add structured output → add RAG → add tools → make it an agent → fine-tune.**
-
-The rule: *stop at the first one that passes your evals*. Don't escalate complexity until evals prove the simpler thing isn't enough. Each step up adds cost, latency, and operational pain.
-
-The most common mistake: jumping straight to "let's build an agent" or "let's fine-tune" before exhausting prompting.
-
-→ Revisit: [Approach — default decision order](./03-approach.md#default-decision-order)
-</details>
-
----
-
-## Q5. Evals: what makes them different from unit tests
-
-Why can't you just write `assert output == "expected_string"` for AI evals?
-
-<details>
-<summary>Answer</summary>
-
-Because the system is **stochastic and the surface of correct answers is fuzzy**. Two equally-good answers can be worded entirely differently. Eval `expected` fields are structured *behavioral* checks:
-
-- "Must cite this doc ID."
-- "Must contain these phrases."
-- "Must NOT contain these phrases."
-- "Tone must match this rubric" (scored by an LLM judge).
-- "Output must validate against this schema."
-
-Aggregate score across the set tells you whether things are getting better or worse. Per-slice breakdown tells you *for whom*.
-
-→ Revisit: [Eval design — what an eval is](./04-evals.md#what-an-eval-is)
-</details>
-
----
-
-## Q6. Build: what v0 deliberately omits
-
-Name five things v0 should *not* have, and one thing it must have.
-
-<details>
-<summary>Answer</summary>
-
-**v0 deliberately omits:**
-
-- Multiple models or routing.
-- Multiple personas.
-- A framework that hides the provider SDK.
-- A vector DB if a flat file works.
-- Caching, retries beyond default, pretty UI.
-
-**v0 must have:**
-
-- A logged baseline eval score on real inputs.
-
-Without the baseline you can't tell whether the next month of iteration helped. Without the omissions you're debugging the wrong layer.
-
-→ Revisit: [Build — what v0 looks like](./05-build.md#what-v0-looks-like)
-</details>
-
----
-
-## Q7. Iterate: the one rule
-
-What's the cardinal rule of the iterate-with-evals loop?
-
-<details>
-<summary>Answer</summary>
-
-**Change one thing per cycle.** Bundle three changes into one PR, and when the score moves you don't know which change caused it. Three separate eval runs cost a few dollars and save weeks of debugging confusion.
-
-Bonus rule: always look at the *per-slice* breakdown, not just the aggregate. A +3% aggregate that hides a -7% on your biggest tenant is a regression you'd ship without knowing.
-
-→ Revisit: [Iterate — what to avoid](./06-iterate.md#what-to-avoid)
-</details>
-
----
-
-## Q8. Iterate: order of operations
-
-If your eval score is stuck, what should you try *before* fine-tuning?
-
-<details>
-<summary>Answer</summary>
-
-In order of cheapness: **prompt wording → few-shot examples → system prompt structure → output schema → retrieval settings → model → decomposition.** Fine-tuning is the *last* resort and almost never the right next step.
-
-Teams that fine-tune early end up locked into a stale model that takes weeks to refresh, when adding three sentences to the prompt would have moved the score the same amount in 20 minutes.
-
-→ Revisit: [Iterate — what to vary, in order of cheapness](./06-iterate.md#what-to-vary-in-order-of-cheapness)
-</details>
-
----
-
-## Q9. Harden: cost cap discipline
-
-Where should the daily $ spend cap live?
-
-<details>
-<summary>Answer</summary>
-
-**In both places: at the provider console *and* in your application code.** Belt + suspenders.
-
-The app-side cap catches runaway logic; the provider-side cap catches bugs in your app-side cap. The cost of getting this wrong is a weekend $5K bill that nobody noticed until Monday. Cost of implementing it: one hour.
-
-→ Revisit: [Harden — cost](./07-harden.md#cost)
-</details>
-
----
-
-## Q10. Harden: prompt injection
-
-What's a *structural* defense against prompt injection (not just trusting the model)?
-
-<details>
-<summary>Answer</summary>
-
-- **Clearly delimit user/retrieved content from system instructions** (e.g., `<<< >>>` blocks or explicit XML tags).
-- **Label untrusted content as untrusted** in the system prompt.
-- **Validate outputs** before acting on them, especially for tool calls and security-relevant decisions.
-- **Sandbox tools** — the executor enforces what's allowed for that user, not the model.
-- **Never put user content in the system slot.**
-
-Relying on the model's safety training alone is insufficient. Architectural defenses are required.
-
-→ Revisit: [Harden — safety](./07-harden.md#safety)
-</details>
-
----
-
-## Q11. Deploy: cohort discipline
-
-Why ship to 5% before 100%?
-
-<details>
-<summary>Answer</summary>
-
-Because **about 30% of eventual issues only appear at full traffic** — but the *first* 30% appear in the internal cohort and another 30% appear in the 5% cohort. Ramping in stages lets you catch those at low blast radius.
-
-Plus: rollback at 5% is "0.3% of users saw a bad experience"; rollback at 100% is "everyone did." The flag flip is identical in both cases — the user impact isn't.
-
-→ Revisit: [Deploy — deployment pattern](./08-deploy.md#deployment-pattern)
-</details>
-
----
-
-## Q12. Monitor: cold-eval vs prod-eval divergence
-
-Your cold eval set scores 0.92 but the nightly prod-eval drifts down to 0.78 over a month. What does this tell you?
-
-<details>
-<summary>Answer</summary>
-
-Most likely, **the eval set has drifted out of sync with real production traffic** — you've overfit to a stale case mix while real users have shifted topics or styles.
-
-Action: sample fresh production failures, add them as eval cases, and *prune* eval cases that no longer represent real usage. The eval set should roughly track the production distribution. When it doesn't, the eval score lies to you.
-
-Other possibilities to rule out: a provider model update (re-pin to a specific version), a retrieval regression (the embedder cron failed), or a new product feature whose docs aren't indexed yet.
-
-→ Revisit: [Monitor — drift detection](./09-monitor.md#drift-detection) and [Improve — pruning the eval set](./10-improve.md#pruning-the-eval-set)
-</details>
-
----
-
-## Q13. Monitor: what NOT to alert on
-
-Which of these should trigger a page, and which should not?
-
-- (a) Daily spend 1.6× forecast
-- (b) Individual user reports a bad answer
-- (c) Eval score drops 6% week-over-week
-- (d) One call takes 25 seconds
-- (e) Schema-validation failures > 2% for 15 minutes
-- (f) Free-tier user's thumbs-down
-
-<details>
-<summary>Answer</summary>
-
-**Page:** (a), (c), (e) — these are aggregate / threshold signals.
-
-**Do not page:** (b), (d), (f) — these are individual events. Triage them, don't alert.
-
-The rule: alert on *rates and trends*, not on individual events. Pager fatigue from per-call alerts kills real alerts' signal value.
-
-→ Revisit: [Monitor — what *not* to alert on](./09-monitor.md#what-not-to-alert-on)
-</details>
-
----
-
-## Q14. Improve: the compounding loop
-
-What's the single highest-leverage habit for compounding quality over a year?
-
-<details>
-<summary>Answer</summary>
-
-**Turn every production failure into an eval case, weekly.** Sample logs → triage real failures → add them with correct `expected` outputs → run iterate loop → ship.
-
-Teams that do this watch their eval set grow from 100 → 800+ cases in year one, with eval scores climbing from ~0.6 to ~0.9. Teams that don't watch quality slowly slide while the cold-eval score stays flat.
-
-The weekly review meeting is the cadence that makes it stick. Without the meeting, "we'll sample logs" turns into "we never did."
-
-→ Revisit: [Improve — the weekly review meeting](./10-improve.md#the-weekly-review-meeting)
-</details>
-
----
-
-## Q15. Handoffs: artifacts vs vibes
-
-Why is "the prompt lives in a Python string in the codebase" considered an anti-pattern?
-
-<details>
-<summary>Answer</summary>
-
-Because prompts are **versioned product artifacts**, not implementation details. They deserve:
-
-- A registry entry with a version, owner, model, and changelog.
-- PR review when changed.
-- An eval-score baseline attached to each version.
-- Linkage from monitoring (so you can answer "which prompt version was live when this happened?").
-
-A prompt buried in a code file with no version history means: no reproducibility, no clear ownership, no way to attribute regressions, no way for a domain expert to suggest changes via PR. The prompt registry pattern is one of the highest-ROI process changes you can make.
-
-→ Revisit: [Handoffs — AI engineer owns the prompt registry](./11-handoffs.md#ai-engineer)
-</details>
-
----
-
-## Scoring yourself
-
-| Score | What it means |
-|---|---|
-| 14-15 | Solid. You can pitch the lifecycle to a teammate confidently. |
-| 11-13 | Most of it stuck. Re-read the 2-3 sections you missed. |
-| 7-10 | The shape is there but the details are fuzzy. Re-read the chapter in one sitting. |
-| < 7 | Re-read the chapter and re-do the checkpoint. The lifecycle is the load-bearing skill for everything that follows. |
-
-## Where to go next
-
-- If you nailed it: continue to [Chapter 4: Tech Stack](/docs/stack) where we map specific 2026 tools to each phase.
-- If you want practice: pick a real AI feature you've used (a support bot, a code completion tool, a search assistant) and reverse-engineer which phase choices that team made.
-- If a specific phase felt shaky: jump back to it via the [Lifecycle overview](./index.md) — each page stands alone.
-
-:::note[A final thought]
-The lifecycle isn't a process to follow once. It's the loop your AI features will live inside for as long as they exist. The teams that ship AI well aren't smarter or better-funded — they've just internalized this loop and built habits around each phase. You now have the map. The next year of practice is what turns it into instinct.
-:::
-
----
-
-→ Back to [Lifecycle overview](./index.md), or continue to [Chapter 4: Tech Stack](/docs/stack).
+→ Continue to [Chapter 4: Tech Stack](/docs/stack) to see what specific tools you'd reach for at each phase.

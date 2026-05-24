@@ -7,52 +7,214 @@ description: A self-test before you move on. If you can answer these without scr
 
 # Foundations checkpoint
 
-If you can answer these in your head, you're ready for the rest of the guide. If you can't, the linked page is where to look.
+You've finished the Foundations chapter. Take a minute to make sure the core ideas stuck.
 
-## The model
+There are **15 questions in the bank** — each visit picks 5 at random, so retaking gives you different ones. If you miss one, the result card tells you exactly which page to revisit.
 
-1. **How many characters is a token, roughly, in English? In Japanese?** ([Tokens](./tokens.md))
-2. **What's the difference between input and output token pricing, and which is usually more expensive?** ([Tokens](./tokens.md))
-3. **Why does the same string tokenize to different counts on different providers?** ([Tokenizers](./tokenizers.md))
-4. **What does an embedding represent, and what's the operation you use to compare two embeddings?** ([Embeddings](./embeddings.md))
-5. **Why is attention cost roughly quadratic in context length, and what's one practical implication?** ([The transformer](./transformer.md))
-6. **What's the difference between prefill and decode, and which one dominates time-to-first-token?** ([The transformer](./transformer.md))
-7. **Name two things you'll do regularly (inference) and one thing you'll probably never do (training).** ([Training vs. inference](./training-vs-inference.md))
-8. **What are the three model tiers, and what's the cascade pattern that exploits them?** ([Model families](./model-families.md))
-9. **When is a reasoning model the right choice, and when is it overkill?** ([Model families](./model-families.md))
+You must pass (≥ 60%) to unlock the Next button at the bottom.
 
-## Using the API
+<Quiz id="foundations-checkpoint" title="Foundations checkpoint" sampleSize={5}>
 
-10. **What are the three message roles in a chat API, and what's added once you do tool calling?** ([Messages](./messages.md))
-11. **A 200K context window — does that count input only, or input + output combined?** ([Context windows](./context-window.md))
-12. **What's the "lost in the middle" effect and how do you mitigate it?** ([Context windows](./context-window.md))
-13. **How does prompt caching reduce cost, and what's the one mistake that nukes your cache hit rate?** ([Prompt caching](./prompt-caching.md))
-14. **Default `temperature` for: extracting JSON from email, brainstorming product names, code generation.** ([Sampling](./sampling.md))
-15. **Why is `temperature=0` not the same as perfectly deterministic?** ([Sampling](./sampling.md))
-16. **Why is streaming effectively non-optional for any user-facing AI feature?** ([Streaming](./streaming.md))
-17. **What's the difference between "JSON mode" and "schema-constrained / structured outputs"?** ([Structured output](./structured-output.md))
-18. **In a tool-use loop, what role does the function result get sent back as?** ([Tool use](./tool-use.md))
-19. **What does `tool_choice="required"` enable that `auto` doesn't?** ([Function calling, deep](./function-calling-deep.md))
-20. **Why are images surprisingly expensive in tokens, and what's a quick mitigation?** ([Multimodal inputs](./multimodal-inputs.md))
+<Question
+  prompt="A rough rule of thumb: 1 token ≈ how many characters of English text?"
+  options={[
+    { text: "About 1 character" },
+    { text: "About 4 characters" },
+    { text: "About 10 characters" },
+    { text: "About 25 characters" }
+  ]}
+  correct={1}
+  explanation="For English, ~4 characters per token is the standard back-of-envelope estimate (roughly 0.75 words). Languages like Japanese or Chinese tokenize much less efficiently — often closer to 1 character per token."
+  revisit={{ to: "/docs/foundations/tokens", label: "Tokens" }}
+/>
 
-## Retrieval & memory
+<Question
+  prompt="Why does the same string tokenize to different token counts on Anthropic vs OpenAI vs Google?"
+  options={[
+    { text: "Each provider charges different rates, so they pad the count" },
+    { text: "Every model family ships its own tokenizer trained on different corpora and vocab sizes" },
+    { text: "The Unicode standard changed between releases" },
+    { text: "Network compression strips whitespace differently" }
+  ]}
+  correct={1}
+  explanation="Tokenizers are model-specific artifacts — different vocabularies, different merge rules, different special tokens. The same sentence can vary by 20%+ across providers, which matters for cost estimation."
+  revisit={{ to: "/docs/foundations/tokenizers", label: "Tokenizers" }}
+/>
 
-21. **Why does almost every modern retrieval system mix BM25 with vector search?** ([Hybrid search](./hybrid-search.md))
-22. **What's Reciprocal Rank Fusion and why is it the default blend?** ([Hybrid search](./hybrid-search.md))
-23. **Which knob has the biggest single-step impact on RAG quality — embedding model, chunking, or reranker?** ([Chunking strategies](./chunking-strategies.md))
-24. **What's the "cheap retrieval → expensive rerank" pattern, and roughly how much recall does it add?** ([Reranking](./reranking.md))
-25. **What's the single biggest cause of bad RAG quality, in practice?** ([RAG basics](./rag-basics.md))
-26. **Name three patterns for giving an LLM "memory" beyond the current conversation.** ([Memory](./memory.md))
-27. **What privacy obligation does stored long-term memory create?** ([Memory](./memory.md))
+<Question
+  prompt="An embedding represents a piece of text as a vector. What's the standard operation to measure how similar two embeddings are?"
+  options={[
+    { text: "Euclidean distance" },
+    { text: "Cosine similarity" },
+    { text: "Hamming distance" },
+    { text: "String edit distance" }
+  ]}
+  correct={1}
+  explanation="Cosine similarity (dot product on normalized vectors) is the default for semantic embeddings — it measures direction, not magnitude, which matches how meaning is encoded."
+  revisit={{ to: "/docs/foundations/embeddings", label: "Embeddings" }}
+/>
 
-## Agents
+<Question
+  prompt="Why does the cost of attention grow roughly quadratically with context length?"
+  options={[
+    { text: "Each token has to attend to every other token, so the work scales with N × N" },
+    { text: "The transformer rebuilds the embedding table for every new token" },
+    { text: "Longer contexts force the model to reload weights from disk" },
+    { text: "Quadratic growth comes from the softmax normalization step, not the attention pattern" }
+  ]}
+  correct={0}
+  explanation="In self-attention every token computes a score against every other token in the window — that's O(N²) in both compute and memory. It's why 1M-token contexts are an engineering achievement, not a free lunch."
+  revisit={{ to: "/docs/foundations/transformer", label: "The transformer" }}
+/>
 
-28. **What's the *one* line of code that makes a chain into an agent?** ([Agent loop](./agent-loop.md))
-29. **Name three failure modes of a long-running agent and how to mitigate each.** ([Agent loop](./agent-loop.md))
-30. **When does an explicit planning step earn its cost vs being theater?** ([Planning and reflection](./planning-and-reflection.md))
-31. **What's a good reason to add a second agent, and a bad one?** ([Multi-agent](./multi-agent.md))
+<Question
+  prompt="Which of these will you do regularly as an AI engineer in 2026, but almost never the others?"
+  options={[
+    { text: "Train a foundation model from scratch" },
+    { text: "Run inference against a hosted model API" },
+    { text: "Hand-derive backpropagation gradients" },
+    { text: "Pre-train your own tokenizer on web-scale data" }
+  ]}
+  correct={1}
+  explanation="Inference (calling an API or hosted model) is your day job. Training a foundation model costs tens of millions and is done by a handful of labs. Fine-tuning sits in between but is increasingly rare too."
+  revisit={{ to: "/docs/foundations/training-vs-inference", label: "Training vs inference" }}
+/>
 
-## If you missed more than 5
+<Question
+  prompt="A `system`, `user`, and `assistant` message walk into a chat API. When you add tool use, what fourth role appears?"
+  options={[
+    { text: "`developer`" },
+    { text: "`agent`" },
+    { text: "`tool` (or `tool_result`)" },
+    { text: "`function`" }
+  ]}
+  correct={2}
+  explanation="Tool/function results come back as their own message role — `tool` in most APIs (or `tool_result` blocks in Anthropic's). The assistant emits a tool call; you reply with a tool message containing the result."
+  revisit={{ to: "/docs/foundations/messages", label: "Messages" }}
+/>
+
+<Question
+  prompt="A model advertises a 200K context window. What does that 200K count?"
+  options={[
+    { text: "Input tokens only" },
+    { text: "Output tokens only" },
+    { text: "Input plus output combined" },
+    { text: "Characters, not tokens" }
+  ]}
+  correct={2}
+  explanation="The window is the total budget for the request — prompt plus generated response must fit inside it. Output is usually further capped by a separate max_tokens param."
+  revisit={{ to: "/docs/foundations/context-window", label: "Context windows" }}
+/>
+
+<Question
+  prompt="What's the single most common mistake that nukes your prompt-caching hit rate?"
+  options={[
+    { text: "Using a model that's too small" },
+    { text: "Putting volatile content (timestamps, user IDs, randomized examples) at the start of the prompt" },
+    { text: "Calling the API from more than one region" },
+    { text: "Setting temperature above 0" }
+  ]}
+  correct={1}
+  explanation="Caches work on prefix match. Anything that varies between calls — a timestamp, a user ID, today's date — invalidates the cache from that point onward. Keep volatile content at the END of the prompt."
+  revisit={{ to: "/docs/foundations/prompt-caching", label: "Prompt caching" }}
+/>
+
+<Question
+  prompt="You're extracting structured JSON fields from incoming customer emails. What's the right temperature?"
+  options={[
+    { text: "0 — you want deterministic, repeatable extraction" },
+    { text: "0.7 — the model needs creativity to handle edge cases" },
+    { text: "1.0 — maximum variety in the output" },
+    { text: "Temperature doesn't matter for extraction tasks" }
+  ]}
+  correct={0}
+  explanation="Extraction is a 'one right answer' task — you want the model to pick the most likely token every time. Save higher temps for brainstorming, naming, or creative writing where variety is the point."
+  revisit={{ to: "/docs/foundations/sampling", label: "Sampling" }}
+/>
+
+<Question
+  prompt="Why is streaming effectively non-optional for any user-facing AI feature?"
+  options={[
+    { text: "It reduces total token cost" },
+    { text: "It cuts perceived latency by showing tokens as they generate, instead of waiting for the full response" },
+    { text: "It improves answer quality" },
+    { text: "It's required by the API spec" }
+  ]}
+  correct={1}
+  explanation="A 5-second wait feels broken; 5 seconds of streaming text feels fast. Total wall-clock time is identical — streaming just frontloads the user's signal that something is happening."
+  revisit={{ to: "/docs/foundations/streaming", label: "Streaming" }}
+/>
+
+<Question
+  prompt="What's the difference between 'JSON mode' and 'schema-constrained / structured outputs'?"
+  options={[
+    { text: "Nothing — they're marketing names for the same feature" },
+    { text: "JSON mode guarantees valid JSON; structured outputs guarantee JSON that matches your specific schema" },
+    { text: "JSON mode is faster; structured outputs are slower" },
+    { text: "JSON mode works on any model; structured outputs require fine-tuning" }
+  ]}
+  correct={1}
+  explanation="JSON mode just promises parseable JSON — the model can still pick wrong field names. Structured outputs constrain decoding to a schema you supply, so you get the exact shape you asked for."
+  revisit={{ to: "/docs/foundations/structured-output", label: "Structured output" }}
+/>
+
+<Question
+  prompt="Why are images surprisingly expensive in tokens?"
+  options={[
+    { text: "Images are billed at a flat 10x rate regardless of size" },
+    { text: "Each image is encoded as hundreds-to-thousands of tokens based on resolution and detail level" },
+    { text: "The model has to download the image, and bandwidth is billed as tokens" },
+    { text: "Images require a separate, more expensive model" }
+  ]}
+  correct={1}
+  explanation="A single 1024×1024 image typically costs 1000+ tokens. Mitigation: downscale before sending, use 'low detail' mode when available, or crop to just the relevant region."
+  revisit={{ to: "/docs/foundations/multimodal-inputs", label: "Multimodal inputs" }}
+/>
+
+<Question
+  prompt="Why does almost every modern retrieval system combine BM25 (keyword) with vector search?"
+  options={[
+    { text: "Vector search is too slow to use alone" },
+    { text: "BM25 nails exact terms (names, IDs, codes) while vectors catch semantic paraphrases — they complement each other" },
+    { text: "BM25 is required for legal compliance" },
+    { text: "Embeddings can't handle queries longer than 100 tokens" }
+  ]}
+  correct={1}
+  explanation="Vectors miss exact-string matches (model numbers, error codes, proper nouns). BM25 misses paraphrases. Hybrid search gets both, and the gains are usually significant — often 10-20% recall."
+  revisit={{ to: "/docs/foundations/hybrid-search", label: "Hybrid search" }}
+/>
+
+<Question
+  prompt="What's the 'cheap retrieval → expensive rerank' pattern in RAG?"
+  options={[
+    { text: "Retrieve a large candidate set with fast methods (BM25 + vectors), then use a slower cross-encoder reranker to reorder the top N" },
+    { text: "Use a small embedding model first, then re-embed with a large model" },
+    { text: "Run retrieval twice and average the results" },
+    { text: "Cache previous queries and skip retrieval entirely" }
+  ]}
+  correct={0}
+  explanation="Retrieval is O(corpus), so it must be cheap. Reranking is O(candidates), so it can afford a much smarter model. Pulling 100 candidates and reranking to 10 is a standard, high-leverage move."
+  revisit={{ to: "/docs/foundations/reranking", label: "Reranking" }}
+/>
+
+<Question
+  prompt="What's the *one* line of code that turns a chain into an agent?"
+  options={[
+    { text: "A `while` loop around the model call that feeds tool results back in until the model stops calling tools" },
+    { text: "An `import openai` statement" },
+    { text: "A call to a vector database" },
+    { text: "Setting `temperature=0`" }
+  ]}
+  correct={0}
+  explanation="An agent is structurally a loop: model emits tool calls → you execute them → results go back into context → model decides what to do next → repeat until done. The loop IS the agent."
+  revisit={{ to: "/docs/foundations/agent-loop", label: "Agent loop" }}
+/>
+
+</Quiz>
+
+---
+
+## If you missed more than 2
 
 Re-read the linked pages. Don't push through to chapter 2 with foundation gaps — every later decision (which model? when to RAG? when to agent?) compounds on the basics.
 
