@@ -13,7 +13,7 @@ const THEMES = [
     body: 'Tokens, embeddings, the transformer, context windows, sampling, streaming, tool calling, RAG, and agent loops — just enough to be useful.',
     tags: ['tokens', 'embeddings', 'RAG', 'agents'],
     cta: 'Read Foundations',
-    to: '/docs/foundations/foundational-concepts',
+    to: '/docs/foundations',
   },
   {
     motif: 'grid',
@@ -22,7 +22,7 @@ const THEMES = [
     body: 'Every major provider, framework, and service: what it does, when to use it, why it exists, and what it replaces.',
     tags: ['vLLM', 'LangChain', 'pgvector', 'Langfuse'],
     cta: 'Read Tech Stack',
-    to: '/docs/stack/tech-stack-decoded',
+    to: '/docs/stack',
   },
   {
     motif: 'lanes',
@@ -31,7 +31,7 @@ const THEMES = [
     body: 'Solo indie builder, 20-person AI startup, and 2,000-engineer enterprise — three radically different ways to ship the same feature.',
     tags: ['solo', 'startup', 'enterprise'],
     cta: 'Compare workflows',
-    to: '/docs/comparison/comparison',
+    to: '/docs/comparison',
   },
   {
     motif: 'cycle',
@@ -40,7 +40,7 @@ const THEMES = [
     body: 'From “idea” to “shipped and measured,” plus the patterns that recur in every production LLM app.',
     tags: ['evals', 'streaming', 'fallbacks', 'safety'],
     cta: 'Read Lifecycle',
-    to: '/docs/lifecycle/ai-project-lifecycle',
+    to: '/docs/lifecycle',
   },
   {
     motif: 'branch',
@@ -49,7 +49,7 @@ const THEMES = [
     body: 'The recurring “should we…” debates, each with a concrete decision rule instead of hand-waving.',
     tags: ['prompt vs RAG', 'build vs buy', 'open vs closed'],
     cta: 'Read Decisions',
-    to: '/docs/decisions/decision-frameworks',
+    to: '/docs/decisions',
   },
   {
     motif: 'rise',
@@ -58,22 +58,22 @@ const THEMES = [
     body: 'What an AI engineer actually does in 2026, the specialization tracks, and how to position yourself.',
     tags: ['AI vs ML eng', 'portfolio', 'comp'],
     cta: 'Read Career',
-    to: '/docs/career/career-path',
+    to: '/docs/career',
   },
 ];
 
 const CHAPTERS = [
-  {n: '01', t: 'Foundations', d: 'How LLM systems work', to: '/docs/foundations/foundational-concepts'},
-  {n: '02', t: 'Roadmap', d: 'From zero to shipping', to: '/docs/roadmap/roadmap-overview'},
-  {n: '03', t: 'Lifecycle', d: 'Idea → shipped → measured', to: '/docs/lifecycle/ai-project-lifecycle'},
-  {n: '04', t: 'Tech Stack', d: 'The 2026 toolbox', to: '/docs/stack/tech-stack-decoded'},
-  {n: '05', t: 'Solo / Indie', d: 'Ship alone, free tier', to: '/docs/solo/indie-ai-workflow'},
-  {n: '06', t: 'Startup AI Team', d: '20-person, eval-first', to: '/docs/startup/startup-ai-workflow'},
-  {n: '07', t: 'Enterprise AI', d: 'Governance & private cloud', to: '/docs/enterprise/enterprise-ai-workflow'},
-  {n: '08', t: 'Comparison', d: 'Scale-by-scale tradeoffs', to: '/docs/comparison/comparison'},
-  {n: '09', t: 'Decisions', d: 'The “should we…” rules', to: '/docs/decisions/decision-frameworks'},
-  {n: '10', t: 'Production Patterns', d: 'What recurs everywhere', to: '/docs/patterns/production-patterns'},
-  {n: '11', t: 'Career', d: 'Position yourself', to: '/docs/career/career-path'},
+  {n: '01', t: 'Foundations', d: 'How LLM systems work', to: '/docs/foundations'},
+  {n: '02', t: 'Roadmap', d: 'From zero to shipping', to: '/docs/roadmap'},
+  {n: '03', t: 'Lifecycle', d: 'Idea → shipped → measured', to: '/docs/lifecycle'},
+  {n: '04', t: 'Tech Stack', d: 'The 2026 toolbox', to: '/docs/stack'},
+  {n: '05', t: 'Solo / Indie', d: 'Ship alone, free tier', to: '/docs/solo'},
+  {n: '06', t: 'Startup AI Team', d: '20-person, eval-first', to: '/docs/startup'},
+  {n: '07', t: 'Enterprise AI', d: 'Governance & private cloud', to: '/docs/enterprise'},
+  {n: '08', t: 'Comparison', d: 'Scale-by-scale tradeoffs', to: '/docs/comparison'},
+  {n: '09', t: 'Decisions', d: 'The “should we…” rules', to: '/docs/decisions'},
+  {n: '10', t: 'Production Patterns', d: 'What recurs everywhere', to: '/docs/patterns'},
+  {n: '11', t: 'Career', d: 'Position yourself', to: '/docs/career'},
   {n: '12', t: 'Glossary', d: 'Every term, defined', to: '/docs/glossary'},
 ];
 
