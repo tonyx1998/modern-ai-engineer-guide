@@ -162,6 +162,8 @@ Return JSON, paginate, indicate truncation, surface errors as structured fields.
 Pre-2023 LLMs could only emit text. Tools turned them from "fancy autocomplete" into systems that can search, compute, and act. Every agent framework, every Cursor-style coding assistant, every retrieval-augmented chat is downstream of this one primitive.
 :::
 
+**→ Going deeper:** For the production discipline — tight tool sets, description craft, parallel execution, structured errors, and human confirmation on destructive actions — see [Tool use done right](../10-patterns/tool-use.md).
+
 ---
 
 → Next: [Function calling, deep](./function-calling-deep.md)

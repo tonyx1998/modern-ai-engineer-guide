@@ -9,6 +9,8 @@ description: Hybrid search, reranking, metadata filtering, citations, evals. The
 
 > **In one line:** A production RAG pipeline is hybrid search, a reranker, per-tenant filters, citation validation, and *separate* evals for retrieval vs generation — not "embed and cosine-search."
 
+> **← Foundations:** New to retrieval-augmented generation? Start with [RAG basics](../01-foundations/rag-basics.md) for the minimal pipeline, then come back here for the production version.
+
 :::tip[In plain English]
 A RAG demo embeds your docs, finds the closest 5 by cosine similarity, and stuffs them in the prompt. That works on a 50-doc corpus and a friendly demo question. In production, the question is "show me the refund policy for Pro plans in German" and "closest 5 by cosine" returns five chunks about *cancellation*. The fixes — keyword + vector together, a reranker, metadata filtering, layout-aware chunking, source-citation enforcement — are what turns the demo into a feature.
 :::

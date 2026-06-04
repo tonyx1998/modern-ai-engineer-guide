@@ -9,6 +9,8 @@ description: Iteration caps, observability per step, structured errors, human ha
 
 > **In one line:** The naive agent loop is 30 lines. The production one is 200, because of the guardrails. The guardrails are non-negotiable.
 
+> **← Foundations:** New to the loop itself? Start with [The agent loop](../01-foundations/agent-loop.md) for the basics, then come back here for the production guardrails.
+
 :::tip[In plain English]
 "Agent" sounds magical; the implementation is plain. The model thinks, calls a tool, sees the result, thinks again, calls another tool, and stops when it has the answer. The whole job of production code is to keep this loop from running forever, costing too much, doing irreversible damage, or silently failing. Those bounds *are* the product.
 :::

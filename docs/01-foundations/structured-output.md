@@ -161,6 +161,8 @@ Half a page of code, no regex, runs on a *small* model, costs fractions of a cen
 Pre-2024, every team had a homegrown "fix the LLM's broken JSON" function. Today it's a one-line `response_format=YourModel`. If you're still writing regex against LLM output, you're working harder than you need to.
 :::
 
+**→ Going deeper:** For the production view — defaulting *everything* to typed output, validation as defense-in-depth, streaming partials, and the provider matrix — see [Structured output everywhere](../10-patterns/structured-output.md).
+
 ---
 
 → Next: [Tool use / function calling](./tool-use.md)

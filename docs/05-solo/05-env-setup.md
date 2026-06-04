@@ -14,6 +14,8 @@ description: The seven free-tier accounts to open on day one, the dotfiles, the 
 "Environment setup" for solo AI is mostly account creation and secret management. The actual code is trivial. The mistakes are all in *which* key ended up in *which* file, and whether spend caps were set before the first prompt was sent. This page is the checklist that prevents the standard week-one disasters.
 :::
 
+*This page assumes basic web-dev and deployment knowledge (env vars, git, deploying to a host like Vercel). If those are new, the companion modern web dev guide covers them from the ground up.*
+
 ## The day-one account checklist
 
 Open all seven before writing any code. Most take 60 seconds.

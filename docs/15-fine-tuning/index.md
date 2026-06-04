@@ -16,6 +16,10 @@ description: How to change a model's actual weights — when it's worth it, how 
 Prompting is giving a smart new hire a sticky note of instructions for each task. RAG is handing them a binder to look things up in. **Fine-tuning is sending them on a training course** so the skill becomes second nature — they no longer need the sticky note. That course is expensive and slow compared to a sticky note, so you only send people on it when the note keeps getting ignored, is too long, or the same lesson is needed thousands of times a day. This chapter teaches you when to send the model to training, how to write its coursework (the dataset), how the training actually works under the hood, and how to check it learned the right thing without forgetting everything else.
 :::
 
+:::note
+New to the math? Skim the [Math primer](../01-foundations/math-primer.md) first — fine-tuning leans on a little intuition for loss, gradients, and learning rate, and one page there makes the rest of this chapter easier.
+:::
+
 ## What this chapter covers
 
 This is the self-contained, first-principles treatment of fine-tuning. By the end you can decide whether to fine-tune, build a clean dataset, run supervised fine-tuning with LoRA/QLoRA on a budget, understand preference tuning and distillation, evaluate the result against the base model, and serve it in production.

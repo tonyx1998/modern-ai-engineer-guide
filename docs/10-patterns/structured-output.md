@@ -9,6 +9,8 @@ description: JSON / typed objects as the default output shape — not just for "
 
 > **In one line:** If the model's output is read by code, it should be a typed object. If it's read by a human, it should still often be a typed object with a `display_text` field — because *you* still want to log, evaluate, and conditionally render it.
 
+> **← Foundations:** For the basics — JSON mode vs schema-constrained output, Pydantic/Zod, and a first worked example — see [Structured output](../01-foundations/structured-output.md).
+
 :::tip[In plain English]
 "Free-form text" is a debugging tax you pay forever. Every place you parse a model's prose with a regex is a future bug. Make the model fill in a form instead — declare the shape, validate the output, fail loudly when it doesn't match. The few cases where you really do want prose can still come back as one field of an object.
 :::

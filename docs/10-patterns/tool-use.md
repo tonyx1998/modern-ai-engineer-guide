@@ -9,6 +9,8 @@ description: Tight tool sets, great descriptions, parallel execution, structured
 
 > **In one line:** The model is only as good at tool use as the tool descriptions you write — and *anything* destructive needs a human in the loop, not a clever prompt.
 
+> **← Foundations:** New to tool calling? Start with [Tool use / function calling](../01-foundations/tool-use.md) for the basics, then return here for the production discipline.
+
 :::tip[In plain English]
 "Tool use" is just: the model emits a structured request like *call `lookup_order` with `order_id=12345`*, your code runs that function, and you hand the result back. The pattern is trivial. The discipline — small tool set, sharp descriptions, structured errors, parallel execution, confirmation on writes — is what separates a useful assistant from a footgun.
 :::
