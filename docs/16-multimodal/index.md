@@ -16,6 +16,10 @@ description: Building AI systems that see, hear, speak, and generate — vision 
 So far you've been mailing letters: you type words, the model types words back. **Multimodal** AI is when the model can also *look at a photo*, *read a scanned invoice*, *listen to a phone call*, *speak out loud*, and *draw a picture*. It's the same kind of model underneath, but now the "letters" can be pixels and sound waves. The tricky part isn't the model — it's the plumbing around it: pictures are huge and expensive, audio has to arrive in tiny chunks if you want a real-time conversation, and you can't grade a generated image with a simple `==`. This chapter teaches you to build each of these and, crucially, to measure whether they're any good.
 :::
 
+:::note
+New to the math? Skim the [Math primer](../01-foundations/math-primer.md) first — embeddings, vectors, and similarity show up across the multimodal pages, and one page there makes them easier to follow.
+:::
+
 ## What this chapter covers
 
 By the end you can build a vision extraction pipeline, generate and edit images, transcribe and synthesize speech, ship a real-time voice agent, handle video, retrieve over images and PDFs, and evaluate outputs that aren't text.

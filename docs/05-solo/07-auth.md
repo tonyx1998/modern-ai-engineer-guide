@@ -16,6 +16,8 @@ description: Clerk or Supabase auth in twenty minutes. Why anonymous LLM endpoin
 
 > **→ Going deeper:** Auth and rate limits stop abuse of the endpoint; they don't stop abuse of the *model itself* (prompt injection, jailbreaks). Even a solo public LLM is worth one read of [Chapter 6: Responsible & Safe AI](/docs/safety), especially [Prompt injection](/docs/safety/safety-prompt-injection).
 
+*This page assumes basic web-dev and deployment knowledge (routes, middleware, environment variables, deploying to a host). If those are new, the companion modern web dev guide covers them from the ground up.*
+
 ## Why auth comes before features
 
 A free, anonymous, uncapped LLM endpoint will be discovered and abused. Concretely:

@@ -185,6 +185,8 @@ Step cap, token cap, error-tolerant exec, truncated results, logged steps. 95% o
 The hype paints agents as autonomous beings. They're not. They're loops over an LLM that calls tools. If you can read the loop, you can debug the agent. If you can't read the loop (because a framework hid it), you can't debug it. Pick frameworks that let you see the loop.
 :::
 
+**→ Going deeper:** This is the foundational loop. For the production version — iteration caps, per-step observability, structured errors, and human handoff — see [The agent loop with guardrails](../10-patterns/agent-loop.md).
+
 ---
 
 → Next: [Planning and reflection](./planning-and-reflection.md)

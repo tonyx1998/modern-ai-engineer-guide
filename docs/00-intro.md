@@ -91,7 +91,7 @@ Grow as an AI engineer, study shipped systems, and look things up.
 
 **No.** Each page teaches its topic in full, right here. The cross-links you'll see — the "→ Next" at the foot of every page, and the inline "see [X]" pointers — are *internal*: they move you around this guide, not off it. External links appear only for two things: tools you need to install, and optional further reading you can safely skip. The learning path is self-contained from "what is a token?" to the case studies.
 
-Where a concept reduces to a small piece of code — cosine similarity, chunking, greedy decoding — you'll find a **runnable challenge** right on the page: write the function, click *Run*, and it's auto-checked in your browser. No setup, no account, nothing to install.
+On select pages where a concept reduces to a small piece of code — cosine similarity, chunking, greedy decoding — you'll find a **runnable challenge** right there: write the function, click *Run*, and it's auto-checked in your browser. No setup, no account, nothing to install. We're adding these to more pages over time; most pages teach through worked, traced examples instead.
 
 ## A note on bias
 

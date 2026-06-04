@@ -174,6 +174,8 @@ Don't conflate them. Always measure both separately. A retrieval recall@5 of 90%
 If you're building an LLM feature on top of your own data — internal docs, knowledge bases, support archives, codebases — RAG is the starting point. Long context, fine-tuning, and agents are all alternatives you reach for *after* RAG has been measured and found insufficient.
 :::
 
+**→ Going deeper:** For the production pipeline — hybrid search, reranking, metadata/tenant filtering, citation validation, and splitting retrieval vs generation evals — see [The RAG pattern in production](../10-patterns/rag-prod.md).
+
 ---
 
 → Next: [Memory](./memory.md)
