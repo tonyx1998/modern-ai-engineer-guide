@@ -61,6 +61,10 @@ The trend is more state laws, not fewer; enterprise AI teams need a state-by-sta
 
 US voluntary framework — Govern, Map, Measure, Manage. Increasingly cited in contracts (federal customers, large enterprise customers) as a baseline expectation. Many enterprises adopt NIST AI RMF as a "north star" so they have a defensible framework to cite regardless of which jurisdiction's rules apply.
 
+:::note[→ Going deeper]
+These regimes describe *what* you must demonstrate; Chapter 6 covers *how* to build it into the system. See the [Safety overview](/docs/safety) and especially [AI governance](/docs/safety/safety-governance) for the operational controls that map onto NIST AI RMF and the EU AI Act's human-oversight and robustness requirements.
+:::
+
 ### FedRAMP
 
 For US federal customers: AI models must run in FedRAMP-authorized environments (Bedrock GovCloud, Azure Government), at appropriate impact levels (Moderate, High). StateRAMP is the equivalent for state-level work.

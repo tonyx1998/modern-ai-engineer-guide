@@ -68,15 +68,15 @@ Each page focuses on **one topic** with worked examples and specific named refer
 
 ### Growing over time
 
-8. [Continuous Learning](./09-continuous-learning.md) — How to keep up with a field that moves monthly without burning out.
-9. [Career Pitfalls](./10-pitfalls.md) — Leaderboard-chasing, framework hype, all-research-no-shipping, prompt-engineer-as-title.
-10. [Bootcamps, Courses, Degrees](./11-bootcamps-degrees.md) — Stanford CS25, fast.ai, Hugging Face course, Maven cohorts, Anthropic Academy — what's worth it.
-11. [A Multi-Year Path](./12-multi-year-path.md) — Year 1 / Year 3 / Year 5 / Year 10 — what you should look like at each level.
+10. [Continuous Learning](./09-continuous-learning.md) — How to keep up with a field that moves monthly without burning out.
+11. [Career Pitfalls](./10-pitfalls.md) — Leaderboard-chasing, framework hype, all-research-no-shipping, prompt-engineer-as-title.
+12. [Bootcamps, Courses, Degrees](./11-bootcamps-degrees.md) — Stanford CS25, fast.ai, Hugging Face course, Maven cohorts, Anthropic Academy — what's worth it.
+13. [A Multi-Year Path](./12-multi-year-path.md) — Year 1 / Year 3 / Year 5 / Year 10 — what you should look like at each level.
 
 ### Finding work, and a checkpoint
 
-12. [Where to find work](./13-jobs.md) — Companies, communities, the indie path.
-13. [Chapter 15 Checkpoint](./99-checkpoint.md) — Self-test for career readiness.
+14. [Where to find work](./13-jobs.md) — Companies, communities, the indie path.
+15. [Chapter 15 Checkpoint](./99-checkpoint.md) — Self-test for career readiness.
 
 ---
 
