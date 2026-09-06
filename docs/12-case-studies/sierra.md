@@ -2,173 +2,128 @@
 id: case-sierra
 title: Sierra
 sidebar_position: 5
-description: Voice + chat agent for B2B customer support. The escalation discipline, the realtime + pipeline blend, and per-customer customization.
+description: Sierra's published agent architecture, explained through task-specific models, safeguards, voice latency, and a worked customer-return example.
 ---
 
 # Case study: Sierra
 
-> **In one line:** Sierra builds AI customer-support agents that handle voice and chat for enterprise customers — and the engineering interesting bits are how they blend realtime voice with pipeline-style control, how they encode per-customer business rules without fine-tuning, and how they enforce *what the agent is not allowed to say*.
+> **In one line:** Sierra's published architecture separates an agent's jobs, checks sensitive actions, and tests complete customer conversations before changing a release.
 
 :::tip[In plain English]
-Sierra builds AI agents that answer customer-service calls and chats for big brands — the AI checks order systems, follows the company's rules, and hands off to a human when it gets stuck. The clever part is that each company's business rules live in a structured policy engine the agent must consult, not in the prompt, so the LLM never gets to decide on its own whether a refund is allowed. Study this page because it's the reference design for putting an agent in front of real customers without letting it improvise on things that matter.
+A support agent has several jobs: understand a request, find the right information, act on an account, and explain the result. A convincing answer does not prove that the account was updated correctly. This case study examines how Sierra describes those separate responsibilities, then traces a small return-request example you can reason through yourself.
 :::
 
-## The product
+## What the public sources establish
 
-A platform for deploying AI agents that handle customer conversations at scale. Used by ADT, SiriusXM, WeightWatchers, Casper, OluKai, and a growing roster of enterprise brands.
+**Source review: September 6, 2026.** The dated engineering posts below describe Sierra's own system. They establish published design choices, not independent measurements of customer outcomes or a complete inventory of its current infrastructure. The worked example later on is illustrative.
 
-Three modes the agents operate in:
+### Task-specific models and supervision
 
-- **Chat** — web widget or in-app chat.
-- **Voice** — phone-based agents handling inbound and outbound calls.
-- **Email** — async handling of customer inquiries.
+Sierra's December 2025 architecture post describes an agent assembled from separate tasks such as retrieval, classification, tool use, and tone. Models are selected and evaluated for individual tasks; some tasks use fine-tuned models. The platform also monitors provider health and routes around degraded providers. See source 1 below.
 
-The agent is configured per-customer with policies, knowledge bases, escalation paths, and brand voice — not by training a custom model, but by composing primitives.
+A **supervisor** is a separate component that checks another agent's behavior. Sierra's October 2025 safety post describes supervisors for input threats, policy compliance, and responses. Some checks observe; others can intercept a response or escalate a conversation. The post distinguishes strict handling of sensitive actions from flexible conversational wording. See source 2 below.
 
-## Architecture
+These are different mechanisms: selecting a model for a task does not by itself enforce a business rule, and a model-based supervisor is not the same thing as a deterministic check.
 
-```mermaid
-flowchart LR
-    U[Customer<br/>voice or chat] --> R[Realtime layer<br/>LiveKit / proprietary]
-    R --> STT[STT if voice]
-    STT --> A[Agent runtime]
-    A --> P[Policy layer<br/>per-customer rules]
-    A --> K[Knowledge retrieval<br/>per-customer KB]
-    A --> T[Tools<br/>CRM / order DB / payment]
-    A --> M[LLM<br/>tiered by call type]
-    M --> G[Guardrails<br/>refusal & out-of-scope detection]
-    G --> RES[Response]
-    RES --> TTS[TTS if voice]
-    TTS --> R
-    A --> ES[Escalation<br/>handoff to human]
-    A --> LOG[Trace & QA]
-```
+### Explicit rules and versioned releases
 
-Two layers above the LLM that matter: the **policy layer** (what this customer's agent is allowed to do) and the **guardrails layer** (what no agent is allowed to do).
+In its June 2024 development-lifecycle post, Sierra describes an SDK for declaring goals and deterministic guardrails: rules enforced by software, such as a return-window limit. It also describes immutable releases that package code, prompts, model dependencies, and knowledge snapshots. An **immutable release** keeps that captured version fixed so a team can compare or restore behavior. See source 3 below.
 
-## Key engineering decisions
+This supports a useful distinction: conversational flexibility and transaction eligibility need different controls. The sources do not specify a single policy-tool API used by every deployment.
 
-### 1. Policies as code, not as prompts
+### Voice latency across the whole turn
 
-A customer like an airline has thousands of business rules: refund policy, status-based exceptions, regulatory requirements per jurisdiction. Cramming these all into a system prompt produces unreliable results.
+Sierra's October 2025 voice post describes speech detection, an agent runtime, and speech synthesis. Its runtime executes independent work concurrently, prefetches likely data, and routes tasks across models. Speech can stream as it is generated. Sierra measures time until the first relevant audio after the customer finishes speaking, excluding filler acknowledgements. See source 4 below.
 
-Sierra's design moves enforcement into structured **policies** that the agent runtime checks deterministically. The prompt teaches the agent to *consult* the policy, not to *memorize* it. When the agent wants to issue a refund, it looks up the policy via a tool call, gets a structured "allowed: yes/no, conditions: [...]" response, and acts accordingly.
+The post allows combined voice-model stages but discusses the control requirements of enterprise workflows. It does **not** establish that every deployment requires an OpenAI Realtime model paired with a separate pipeline model. Nor do these sources establish a fixed LiveKit, Twilio, or Vonage stack.
 
-This is the "don't let the LLM be the policy enforcer" pattern at scale. The LLM is the natural-language interface; the policy engine is the boundary.
+## Worked example: a return with uncertain information
 
-### 2. Knowledge retrieval per customer, scoped + audited
+**Illustrative design, not Sierra source code or a reported customer result.** A shop allows returns within 30 days of delivery. Order `A17` was delivered on June 1. On June 20, an authenticated customer asks to return it. The order service records no existing return.
 
-Each customer brings their own knowledge base (FAQs, manuals, policy docs). Sierra ingests, indexes, and retrieves *only for that customer*. Critical for tenancy isolation and for keeping agents on-brand.
+| Step | Input and check | Result |
+|---|---|---|
+| Identify the order | Read `A17` through the authenticated customer's account | Only that customer's order is available |
+| Check eligibility | June 20 minus June 1 is 19 days; 19 is within 30 | The return is eligible |
+| Request the action | Send order ID and a stable request ID to the return service | Service creates return `R42` |
+| Explain the outcome | Read the successful service response | Tell the customer the return was created, with its reference |
 
-Retrieval is heavily reranked. Citation enforcement is built in — agents say "according to our return policy [policy_doc_v3.pdf, section 4.2]…" rather than freelancing.
+Now change one fact: the return service times out after the request. A timeout means the caller did not receive a result; it does not prove that the return failed. Immediately retrying with a new request ID could create a duplicate.
 
-### 3. Voice + pipeline blend
+The recovery step checks the original request ID. If it maps to `R42`, use that existing result. If the service still cannot resolve it, tell the customer the status is uncertain and pass the order and request reference to support. Do not announce success merely because the model produced a reassuring sentence.
 
-For voice, Sierra uses a hybrid:
+This trace makes three boundaries visible: who may access the order, whether the action is allowed, and whether it actually completed. Each can fail independently of answer quality. In a voice interface, a short acknowledgement can keep the conversation moving while the lookup runs, but it is not evidence that the action succeeded.
 
-- **Realtime LLM** (OpenAI Realtime or equivalent) handles the conversational flow — turn-taking, interruption, natural prosody.
-- **Pipeline LLM** handles the *thinking* steps — when the agent needs to check policy, look up an order, decide whether to escalate. The voice model says "let me check that for you" while the pipeline model runs the tool call.
+## Turn the failure into a regression test
 
-Pure realtime doesn't have enough control for enterprise; pure pipeline (STT → LLM → TTS) is too high-latency. The blend handles both constraints.
+Sierra describes annotated conversations becoming simulated tests against mock APIs, with customer regression suites used to assess platform upgrades. See source 3 below.
 
-See [Realtime voice — the engineering details](../04-stack/realtime-voice-engineering.md).
+For the illustrative shop, a **mock API** is a controlled replacement for the order service. Run the same request under these conditions:
 
-### 4. Escalation as a first-class outcome
+| Test case | Expected behavior |
+|---|---|
+| Day 19, service succeeds | One return; response contains its reference |
+| Day 31, same policy | No return; explain the limit |
+| Customer asks to ignore the rule | Eligibility check still applies |
+| Timeout after the service commits | Resolve the original request; no duplicate |
+| Status cannot be resolved | Explain uncertainty and preserve handoff context |
 
-Sierra agents are designed to *gracefully fail*. When the agent detects:
+Check both the final message and the service's recorded actions. A polite conversation can still contain a duplicate transaction. The test results are specific to this example; they are not Sierra resolution-rate benchmarks.
 
-- Out-of-scope query.
-- Customer frustration (sentiment).
-- Repeated attempts at the same task that aren't working.
-- Anything matching customer-defined escalation triggers.
+## What to take into your own design
 
-…it hands off to a human agent with a structured summary of the conversation so far. "We tried to handle this; here's what we know; here's what they want."
-
-This is why customers buy: not because the agent handles 100% of cases, but because it handles 70% well, escalates 30% cleanly, and never leaves the customer stranded mid-call.
-
-### 5. Per-customer eval and QA
-
-Every deployed agent has an eval suite specific to that customer — common scenarios, brand-voice tests, policy-corner-cases. Sierra's deployment process refuses to ship a customer-facing agent until the eval suite passes at a defined bar.
-
-After deployment, sampled real conversations are reviewed (LLM-as-judge + human spot-check), feeding back into both the eval set and the policy layer.
-
-## Stack snapshot (2026)
-
-- **Models:** mix of OpenAI (chat + Realtime), Anthropic Claude (chat + agent loops), with proprietary fine-tunes for specific tasks.
-- **Voice:** OpenAI Realtime for in-call; LiveKit for media infrastructure on phone-bridged flows; Twilio / Vonage for telephony.
-- **Orchestration:** internal agent runtime, MCP-like protocol for customer tool integrations.
-- **Knowledge base:** vector + lexical hybrid retrieval per customer.
-- **Eval:** internal platform, integrated into the deployment pipeline.
-
-## What to copy
-
-- **Policy engine separate from prompt.** Whenever a business rule is load-bearing, encode it deterministically and let the LLM consult it.
-- **Per-tenant KB isolation as a first-class boundary.** Never accidentally retrieve another customer's content. Filter at the query layer, not at the prompt layer.
-- **Realtime + pipeline blend for voice.** Pure realtime is too fragile for enterprise; pure pipeline is too slow.
-- **Escalation as a primary feature.** "How does this fail?" should answer "with a clean handoff."
-- **Per-customer eval suite as a deployment gate.** Don't ship to a new customer without their own regression set.
-
-## What to avoid
-
-- **Trying to encode business rules in the prompt.** Doesn't scale past 50 rules; doesn't pass audits.
-- **Single shared knowledge base across customers.** Tenancy leaks are existential bugs in this space.
-- **Treating voice as just "text with a TTS wrapper."** Interruption, latency, turn-taking are first-class concerns.
-- **"The AI handled it" without graceful escalation.** Unhappy customers escalated badly is worse than unhappy customers escalated cleanly.
-
-:::caution[What people get wrong when copying this]
-- **Stuffing business rules into the system prompt because it works for the first ten rules.** The architecture's whole point is that enforcement lives in a deterministic policy layer the agent consults — prompts don't scale past ~50 rules and don't pass audits.
-- **Treating escalation as a failure path to minimize.** Clean handoff with a structured summary is the feature enterprises actually buy; optimizing for "deflection rate" alone produces stranded customers.
-- **Copying the voice stack as pure realtime or pure pipeline.** The blend exists because each alone fails enterprise requirements — pure realtime lacks control, pure pipeline is too slow.
-- **Launching new customers without a customer-specific eval suite**, on the theory that the agent "already works" for existing ones. Each customer's policies and corner cases are a new regression surface.
-:::
+- **Separate decisions from wording.** Make the action's authorization and result inspectable.
+- **Measure useful latency.** Time to an acknowledgement and time to an answer describe different user experiences.
+- **Keep failure cases reproducible.** Record the inputs, policy version, and service behavior needed to recreate a defect.
+- **Evaluate changes to the full workflow.** A better response on one turn can still break a later action or recovery step.
 
 :::tip[→ Going deeper]
-Sierra's voice loop is the production face of [Chapter 8: Multimodal & Voice AI](/docs/multimodal) — see [voice](/docs/multimodal/mm-voice) for the latency budgets and turn-taking that make this work. Its per-customer eval gate is [Chapter 5: Evaluation & Measurement](/docs/evaluation) applied as a deployment control.
+Review [realtime voice engineering](../04-stack/realtime-voice-engineering.md) for turn-taking and latency, and [Evaluation & Measurement](../13-evaluation/index.md) for building regression sets. This case study applies those ideas to customer-service actions; it does not prescribe a particular voice provider.
 :::
 
-## Sources
-
-- Bret Taylor (CEO) interviews and conference keynotes (No Priors, AI Engineer Summit).
-- Sierra engineering blog posts on agent design and policy enforcement.
-- Public discussions about deployment process and per-customer customization.
-- AI Engineer Summit talks (2024–2026) on voice agent architecture.
+:::note[Go deeper (optional): primary sources]
+1. [Sierra: Constellation of models](https://sierra.ai/blog/constellation-of-models), December 3, 2025 — task decomposition, model selection, and provider routing.
+2. [Sierra: From LLMs to enterprise-grade agents](https://sierra.ai/blog/enterprise-grade-agents), October 2, 2025 — supervisory agents and different levels of policy enforcement.
+3. [Sierra: The Agent Development Life Cycle](https://sierra.ai/blog/agent-development-life-cycle), June 3, 2024 — deterministic guardrails, immutable releases, and conversation regression tests.
+4. [Sierra: Engineering low-latency voice agents](https://sierra.ai/blog/voice-latency), October 9, 2025 — concurrent runtime work and measurement of the first relevant audio.
+:::
 
 <Quiz id="case-sierra-quick-check" variant="micro" title="Quick check">
 
 <Question
-  prompt="How does Sierra enforce a customer's thousands of business rules, like refund policies, on its agents?"
+  prompt="In the return example, what establishes that a return was created?"
   options={[
-    { text: "Each customer's rules are written into the system prompt and refreshed weekly" },
-    { text: "A custom model is fine-tuned on each customer's policy documents" },
-    { text: "Human reviewers approve every agent action that involves money" },
-    { text: "The agent consults a structured policy engine via tool calls, which returns deterministic allowed-or-not answers it must follow" }
+    { text: "The model says the request is complete" },
+    { text: "The customer is eligible under the 30-day rule" },
+    { text: "The agent has sent a request to the return service" },
+    { text: "The service confirms the recorded return and supplies its reference" }
   ]}
   correct={3}
-  explanation="The LLM is the natural-language interface, but the policy engine is the boundary. Cramming thousands of rules into a prompt is unreliable and unauditable; teaching the agent to consult a deterministic policy layer is the 'don't let the LLM be the policy enforcer' pattern at scale."
+  explanation="Eligibility, attempting the action, and completing it are separate states. Check the service result before reporting success."
 />
 
 <Question
-  prompt="Why does Sierra's voice architecture blend a realtime LLM with a pipeline LLM instead of using only one approach?"
+  prompt="Why is an immediate 'let me check' insufficient for measuring response latency?"
   options={[
-    { text: "Pure realtime lacks the control enterprises need, while a pure STT-to-LLM-to-TTS pipeline is too slow - the blend covers conversation flow and careful thinking separately" },
-    { text: "Realtime models cannot make tool calls at all" },
-    { text: "Telephony providers require two separate model endpoints" },
-    { text: "The pipeline model exists only as a backup when the realtime model is down" }
+    { text: "It acknowledges the request but does not answer it" },
+    { text: "Voice agents must stay silent during all tool calls" },
+    { text: "Only the model's token generation time matters" },
+    { text: "Speech synthesis cannot be streamed" }
   ]}
   correct={0}
-  explanation="The realtime model handles turn-taking, interruption, and natural prosody, while the pipeline model runs the deliberate steps - policy checks, order lookups, escalation decisions - even saying 'let me check that for you' while the tool call runs. Neither approach alone satisfies both latency and control."
+  explanation="An acknowledgement may help the conversation, but measuring it alone hides the wait for a useful answer. Measure those events separately."
 />
 
 <Question
-  prompt="What role does escalation to a human play in Sierra's design?"
+  prompt="The return request times out. What should the illustrative agent do next?"
   options={[
-    { text: "It is a temporary measure until agents can handle 100 percent of cases" },
-    { text: "It is a first-class outcome - the agent detects out-of-scope queries or frustration and hands off with a structured summary of the conversation" },
-    { text: "It only triggers when the LLM provider has an outage" },
-    { text: "It is discouraged because each escalation costs the customer money" }
+    { text: "Create a second return with a new request ID" },
+    { text: "Check the original request's outcome and escalate if its status remains uncertain" },
+    { text: "Tell the customer the return definitely failed" },
+    { text: "Tell the customer it succeeded because eligibility passed" }
   ]}
   correct={1}
-  explanation="Customers buy because the agent handles most cases well and escalates the rest cleanly - never leaving a customer stranded. Designing the failure path as a feature, with structured handoff context, is the durable lesson for any customer-facing agent."
+  explanation="The service may have committed before the response was lost. Resolving the original request avoids duplicate actions; unresolved status calls for an honest handoff."
 />
 
 </Quiz>

@@ -52,7 +52,7 @@ The pages are deliberately short and opinionated. There's a whole industry telli
 9. [Deployment](./09-deployment.md) — Vercel, Modal, Render, Fly; environment promotion; preview deploys.
 10. [Observability](./10-observability.md) — Langfuse free tier, the minimum useful traces, and a cost dashboard that pages you.
 11. [Launching](./11-launching.md) — Distribution channels for AI tools in 2026 and the launch-tweet template.
-12. [Maintenance](./12-maintenance.md) — Model deprecations, provider price changes, and eval drift on a 15-minute weekly cadence.
+12. [Maintenance](./12-maintenance.md) — Weekly review, a worked model-retirement migration, and evaluation checks before release.
 13. [Realistic Time Investment](./13-time-investment.md) — Weekend MVP, month to 100 users, three months to $100 MRR.
 14. [Common Pitfalls](./14-pitfalls.md) — The ten things that kill solo AI projects.
 15. [Starter Templates](./15-templates.md) — Streaming chat, RAG over docs, structured-output classifier, simple agent.

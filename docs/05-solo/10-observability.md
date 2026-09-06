@@ -237,4 +237,6 @@ Self-check:
 
 ## What's next
 
+Use these traces in the [maintenance model-migration walkthrough](./12-maintenance.md#1-model-deprecations) to verify that web requests and background jobs use the intended model after a release.
+
 → Continue to [Launching](./11-launching.md) where we'll go from "deployed URL" to "strangers using it" with the 2026 distribution playbook.

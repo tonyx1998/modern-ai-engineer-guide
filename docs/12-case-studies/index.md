@@ -42,7 +42,7 @@ Read them in any order. They're independent.
 
 ### Voice & customer support
 
-- [Sierra](./sierra.md) — Voice + chat agent for B2B customer support. Realtime + pipeline architecture, escalation discipline.
+- [Sierra](./sierra.md) — Customer-service agents. Published task and supervisor architecture, voice latency, and a traced return-request example.
 
 ### Vertical AI (enterprise)
 

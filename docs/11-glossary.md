@@ -254,6 +254,8 @@ A single A–Z reference for every term used in this guide. Plain-English defini
 
 ## I
 
+**Immutable release** — A fixed snapshot of application code and dependencies, such as prompts, model versions, and knowledge, kept for comparison or rollback.
+
 **Image embedding** — A vector representation of an image. Used for similarity search across images, or to feed images into a text model.
 
 **Incident** — An unplanned event where an AI feature is harming users or the business *right now* — wrong answers at scale, a data leak, a cost blowout, an outage. Live and time-boxed, unlike an ordinary bug ticket. Classified by *severity*.
@@ -359,6 +361,10 @@ A single A–Z reference for every term used in this guide. Plain-English defini
 **Mixtral** — Mistral's *MoE* model family.
 
 **Modal** — A serverless platform popular for hosting custom Python/GPU inference workloads.
+
+**Mock API** — A controlled substitute for a service that returns chosen responses during a test, so failures and edge cases can be reproduced.
+
+**Model deprecation / retirement** — Deprecation announces that a model is leaving service; retirement makes it unavailable. Use the deadline for the exact model and platform.
 
 **Model card** — A short document describing a model's intended use, training data, limitations, and known risks.
 
@@ -553,6 +559,8 @@ A single A–Z reference for every term used in this guide. Plain-English defini
 **Structured output** — Forcing the model to emit data matching a *JSON Schema*. Underlies tool calls and typed responses.
 
 **System card** — A document accompanying a major model release, covering capabilities, evals, and safety mitigations.
+
+**Supervisor** — In an agent system, a component that checks another agent's inputs, actions, or responses and may flag or intercept a problem.
 
 **Symbolic task** — A task with exact, rule-based answers reached by following a procedure (arithmetic, counting, sorting, logic). The axis where LLMs are weakest — the opposite of a traditional computer — and where you delegate to a *tool* instead of trusting the model's output. Contrast with fuzzy, pattern-based language tasks. See *jagged intelligence*.
 
