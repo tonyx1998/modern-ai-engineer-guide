@@ -238,6 +238,8 @@ Hosted products (Vapi, Retell, Bland) bundle all of this. DIY uses LiveKit + Pip
 
 ## Cost controls specific to voice
 
+For a sourced production example, the [Sierra case study](../12-case-studies/sierra.md#voice-latency-across-the-whole-turn) explains its published latency stages and distinguishes an acknowledgement from the first relevant answer.
+
 Voice is the most expensive feature per active user in most stacks. Hard limits to set, server-side, day one:
 
 - **Max session length** (e.g., 15 minutes). Enforced server-side via the session token's TTL plus a watchdog that tears down the WebRTC if exceeded.

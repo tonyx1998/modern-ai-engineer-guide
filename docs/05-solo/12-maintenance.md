@@ -3,15 +3,15 @@ id: solo-maintenance
 title: Maintenance
 sidebar_position: 13
 sidebar_label: 12. Maintenance
-description: A 15-minute weekly cadence. Model deprecations, provider price changes, eval drift, and how to keep a solo AI tool alive without burning out.
+description: A weekly review for a solo AI app, with a worked model-retirement migration, evaluation checks, cost monitoring, and recovery planning.
 ---
 
 # Maintenance
 
-> **In one line:** 15 minutes a week — eval re-run, cost check, inbox triage, deps. That's the whole maintenance load on a healthy solo AI tool.
+> **In one line:** Use a short weekly review to find maintenance work early; budget separate time to investigate failures, test upgrades, and release fixes.
 
 :::tip[In plain English]
-A shipped solo AI tool is *much* less work to maintain than a normal SaaS, because there's almost no code. But there are three things that move under you: the model (deprecations, price changes), the prompt (drift as real inputs differ from your eval set), and the user expectations. A 15-minute weekly check catches all three before they become emergencies.
+A shipped AI tool still has code, dependencies, users, and services to maintain. Its model can also be retired, and real inputs can expose gaps in your tests. A weekly review gives those issues a regular place to surface. Fifteen minutes is a starting timebox for a small, quiet app, not a promise that all maintenance will fit inside it.
 :::
 
 ## The 15-minute weekly ritual
@@ -21,33 +21,42 @@ Same time each week (Sunday evening works for most). Set a recurring calendar bl
 1. **Re-run `eval.py`** (1 min). All 20 rows still pass? If not, investigate.
 2. **Open Langfuse dashboard** (3 min). Any error spike? Any latency regression? Top user reasonable?
 3. **Open Anthropic / OpenAI console** (1 min). Spend on track? Any unusual day?
-4. **Open Sentry** (2 min). Triage new issues. Most can be ignored or rate-limited; one in ten is real.
+4. **Open Sentry** (2 min). Triage new issues by affected users and severity; assign follow-up work to failures that need investigation.
 5. **Open Stripe dashboard** (2 min). Any failed charges? Any chargebacks? Cancellations?
 6. **Triage user inbox** (5 min). Reply to anyone who emailed. Even "got it, will look" beats silence.
-7. **Merge safe Dependabot PRs** (1 min). Patch + minor versions for known-good deps.
+7. **Review dependency updates** (1 min). Check release notes and test results; schedule upgrades that need further verification.
 
-15 minutes, real number. Anything more is either fire-fighting (rare) or feature work (different time block).
+If the review finds a broken flow, an upcoming shutdown, or an unexplained bill, reserve time to resolve it. Automated alerts still need to catch urgent problems between weekly reviews.
 
 ## The four things that move under you
 
 ### 1. Model deprecations
 
-Providers ship new models and quietly retire old ones. The cycle in 2026 is:
-
-- New model ships → old model gets a "deprecated" badge.
-- ~12 months later → old model becomes unavailable.
-- Your code throws on the next request.
+**Deprecated** means a model is scheduled to leave service; **retired** means it is unavailable. Use the deadline in the notice for your exact model and hosting platform. There is no universal twelve-month window, and a pinned model ID does not prevent retirement. The optional provider reference below documents one concrete lifecycle.
 
 **Defenses:**
 
-- Pin the model string explicitly (`claude-sonnet-4-5`, not `claude-latest`).
-- Subscribe to your provider's announcement RSS / email.
-- When you see a deprecation warning, schedule a bump within a month, don't defer indefinitely.
-- The bump process: change the model string in your config → re-run `eval.py` → spot regressions → adjust prompt if needed → commit & deploy.
+- Record the exact model ID and platform used by each app, background job, and fallback.
+- Watch your provider's deprecation notices and record the retirement date when one appears.
+- Choose a migration date early enough to test a replacement and recover from a failed rollout before retirement.
+- Compare the replacement on your eval set, schema/tool behavior, latency, and cost; verify the released app actually uses it.
+
+:::note[Worked example: plan backward from retirement]
+These dates and results are illustrative. A notice arrives on September 6: model A retires October 20. Your summarizer uses A in the web request handler and in a nightly retry job.
+
+| Step | Evidence to record | Decision |
+|---|---|---|
+| Inventory usage | Both model settings and the fallback are listed | Include the background job in the migration |
+| Test candidate B | A passes 20/20 saved cases; B passes 19/20 and omits an action item | Investigate the failed case before release |
+| Retest the fix | B passes the saved set plus a new missing-action-item case; measured cost fits the app's limit | Schedule deployment with time left before October 20 |
+| Verify production | Web and nightly traces report B; errors and output checks remain within the app's limits | Keep monitoring and retain the test record |
+
+A passing set covers only those examples. Review representative fresh inputs too. If B fails after deployment, reverting to A is an option only while A remains available; after its retirement you need another tested model or a clear temporary-unavailability response.
+:::
 
 ### 2. Provider price changes
 
-Providers can raise (rarely lower) prices with ~30 days notice. The impact on a solo tool is usually small in absolute dollars but can flip a tier's margin negative.
+Pricing and billing rules can change. Check the actual notice and effective date instead of assuming a standard notice period. Recalculate using your app's input and output usage; the same price change can affect short classifications and long summaries differently.
 
 **Defenses:**
 
@@ -69,7 +78,7 @@ This is the single most valuable monthly habit. The eval grows from your real us
 
 ### 4. User-expectation drift
 
-If GPT-5 ships next week and is 10% better than your model, your users will notice — they'll compare your output to ChatGPT's. Solo tools can't always be on the frontier of frontier, but you can be *responsive*.
+Users may compare your output with newer tools. Compare replacements on the tasks your app promises to solve; a general benchmark increase does not establish that your app's results improve.
 
 **Defenses:**
 
@@ -79,7 +88,7 @@ If GPT-5 ships next week and is 10% better than your model, your users will noti
 
 ## When to invest beyond 15 min/week
 
-Three signals that maintenance load needs to go up:
+Signals that maintenance load needs to go up:
 
 | Signal                                | Add                                                        |
 |---------------------------------------|-------------------------------------------------------------|
@@ -110,15 +119,15 @@ Solo projects burn out their creators. If you're dreading the Sunday check-in fo
 :::note[Worked example: catching a quiet regression]
 Your weekly eval run shows row #14 (the adversarial prompt-injection test) failing for the first time since launch. The model now follows the injection where it used to ignore it.
 
-Likely cause: provider silently updated the model snapshot, or you bumped versions without re-evaling.
+First reproduce the failure and compare the recorded model ID, prompt, retrieved context, tool configuration, and dependency versions with the last passing run. One failure does not establish that the provider changed a model; nondeterministic output and changed application inputs also need investigation.
 
-Fix: pin the older version if available, or update the system prompt to be more robust against the injection. Add 2–3 more adversarial rows that catch the same class of attack. Commit.
+If the failure could expose private data or trigger an unauthorized action, disable that path while you investigate. Fix the relevant permission or tool boundary, test the existing cases plus variants of this attack, and inspect the result before release. Stronger prompt wording alone does not enforce authorization.
 
 Without the weekly eval, you'd have learned about this from a user (best case) or a Twitter screenshot of your tool being jailbroken (worst case).
 :::
 
 :::info[Highlight: the prompt is the maintenance surface]
-On a normal SaaS, you maintain code, dependencies, and infra. On a solo AI tool, the **prompt** is the highest-maintenance surface. It's where bugs hide, where quality drifts, and where the most impactful improvements live. Treat it like the most important file in your repo — because it is.
+Treat prompts as versioned application behavior: review changes and keep their evaluation results. Also maintain the code, data access rules, dependencies, and services around them. A prompt change cannot repair every kind of failure.
 :::
 
 ## Common mistakes
@@ -144,13 +153,13 @@ Self-check:
 <Question
   prompt="What is the primary defense against a model deprecation breaking your tool one morning?"
   options={[
-    { text: "Pin the exact model string, watch provider announcements, and schedule the bump within a month of any deprecation warning" },
+    { text: "Record the model and platform, watch retirement notices, and test a replacement before the stated deadline" },
     { text: "Use a model alias like claude-latest so you always get the newest version automatically" },
     { text: "Self-host an open model so no provider can deprecate it" },
     { text: "Keep two providers wired in production and load-balance between them" }
   ]}
   correct={0}
-  explanation="Pinning an explicit version plus subscribing to announcements means deprecations arrive as scheduled work, not 3am outages — and every bump goes through a fresh eval run. The claude-latest alias is the tempting opposite: it avoids the hard cutoff but lets quality move under you silently, which the page treats as worse."
+  explanation="An explicit model ID makes usage inspectable but does not keep a retired model available. Work backward from the actual deadline and include background jobs and fallbacks in the migration."
 />
 
 <Question
@@ -174,10 +183,18 @@ Self-check:
     { text: "Notifying all users by email about the upcoming change" }
   ]}
   correct={1}
-  explanation="The rule is absolute: every model string change requires re-running the evals before merge, because 'it's just a minor version, should be fine' is exactly how silent regressions land — like the worked example where a prompt-injection eval row started failing after a quiet snapshot update. The canary option sounds professional but is team-scale machinery the 30-second eval run replaces."
+  explanation="A model change can alter application behavior, so rerun the evals and inspect failures before merging. Those checks complement production monitoring and an appropriate rollout; a passing eval does not replace them."
 />
 
 </Quiz>
+
+:::tip[→ Going deeper]
+[Observability](./10-observability.md) explains the traces to record during these checks. Revisit [Deployment](./09-deployment.md) before releasing a replacement model.
+:::
+
+:::note[Go deeper (optional): provider reference]
+[Anthropic's model-deprecation documentation](https://platform.claude.com/docs/en/about-claude/model-deprecations), reviewed September 6, 2026, distinguishes deprecated from retired models and lists deadlines and replacements. Check the schedule for the platform you use; partner-hosted models can have different dates.
+:::
 
 ## What's next
 
